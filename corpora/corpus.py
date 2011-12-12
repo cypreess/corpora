@@ -58,9 +58,17 @@ class Corpus:
     
     def make_new_chunk(self):
         self.set_property('current_chunk' , self.get_property('current_chunk') + 1 )
-        self.set_property('current_chunk_size', 0 )
             
-        file(os.path.join(self.corpus_path, Corpus.CHUNK_PREFIX + str(self.get_property('current_chunk'))), 'w').close()
+        try:
+            file(os.path.join(self.corpus_path, Corpus.CHUNK_PREFIX + str(self.get_property('current_chunk'))), 'w').close()
+        except IOError, err:
+                if err.errno == 24:
+                    self.chunks = {}
+                    file(os.path.join(self.corpus_path, Corpus.CHUNK_PREFIX + str(self.get_property('current_chunk'))), 'w').close()
+                else:
+                    raise err
+
+        
         self.save_config()
     
     def test_chunk_size(self, new_size):
@@ -74,12 +82,20 @@ class Corpus:
     def get_chunk(self, number=None):
         if number is None:
             number = self.get_property('current_chunk')
-        try:
+        if self.chunks.has_key(number):
             return self.chunks[number]
-        except:
-            self.chunks[number] = file(os.path.join(self.corpus_path, Corpus.CHUNK_PREFIX + str(number)), 'r+b')
-            return self.chunks[number]
-    
+        else:
+            
+            try:
+                self.chunks[number] = file(os.path.join(self.corpus_path, Corpus.CHUNK_PREFIX + str(number)), 'r+b')
+                return self.chunks[number]
+            except IOError, err:
+                if err.errno == 24:
+                    self.chunks = {}
+                    self.chunks[number] = file(os.path.join(self.corpus_path, Corpus.CHUNK_PREFIX + str(number)), 'r+b')
+                    return self.chunks[number]
+                else:
+                    raise err
     def add(self, text, ident, **headers):
         if self.ridx.has_key(ident):
             raise Corpus.ExceptionDuplicate()

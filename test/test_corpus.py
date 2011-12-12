@@ -34,7 +34,6 @@ class TestCorpus(unittest.TestCase):
         d = Corpus('/tmp/TEST_CORPUS')
         
         self.assertEqual(d.get_property('current_chunk'), 1)
-        self.assertEqual(d.get_property('current_chunk_size'), 0)
         self.assertTrue(os.path.isfile(os.path.join('/tmp/TEST_CORPUS/' , Corpus.CHUNK_PREFIX + '1')))
         
         del c, d
