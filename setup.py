@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='corpora',
-    version='0.1',
+    version='1.0',
     author="Krzysztof Dorosz",
     author_email="cypreess@gmail.com",
     description=("Lightweight raw text corpora system."),
