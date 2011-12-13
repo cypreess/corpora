@@ -5,6 +5,7 @@ import yaml
 import cPickle as pickle
 
 class Corpus:
+    '''Corpus class is responsible for creating new corpus and also represents a corpus as an object'''
     CHUNK_PREFIX="chunk"
     CONFIG_FILE="config"
     IDX_FILE="idx"
@@ -35,6 +36,8 @@ class Corpus:
 
     @staticmethod
     def create( path, **properties ):
+        '''Static method for creating new corpus in the given ``path``. Additional
+        properties can be given as named arguments. '''
         os.makedirs(path)
         if not properties.has_key('chunk_size') :
             properties['chunk_size'] = 1024
@@ -50,18 +53,22 @@ class Corpus:
       
     
     def save_config(self):
+        '''Saving properties of corpora to config file.'''
         yaml.dump(self.properties, file(os.path.join(self.corpus_path, Corpus.CONFIG_FILE), 'w'), default_flow_style=False)
 
     def save_indexes(self):
+        '''Saving all indexes to apropriate files.'''
         pickle.dump(self.idx, file(os.path.join(self.corpus_path, Corpus.IDX_FILE ), 'wb'))
         pickle.dump(self.ridx, file(os.path.join(self.corpus_path, Corpus.RIDX_FILE ), 'wb'))        
     
     def make_new_chunk(self):
+        '''Creates new chunk with next sequential chunk number.'''
         self.set_property('current_chunk' , self.get_property('current_chunk') + 1 )
             
         try:
             file(os.path.join(self.corpus_path, Corpus.CHUNK_PREFIX + str(self.get_property('current_chunk'))), 'w').close()
         except IOError, err:
+                # Dealing with "too many files opened"
                 if err.errno == 24:
                     self.chunks = {}
                     file(os.path.join(self.corpus_path, Corpus.CHUNK_PREFIX + str(self.get_property('current_chunk'))), 'w').close()
@@ -72,6 +79,7 @@ class Corpus:
         self.save_config()
     
     def test_chunk_size(self, new_size):
+        '''Tests if ``new_size`` data will fit into current chunk.'''
         chunk = self.get_chunk()
         chunk.seek(0,2)
         chunk_size = chunk.tell()
@@ -80,6 +88,7 @@ class Corpus:
         return chunk_size + new_size <=  self.get_property('chunk_size')
         
     def get_chunk(self, number=None):
+        '''Getter for chunk. Default chunk is current_chunk. Method caches opened chunk files.'''
         if number is None:
             number = self.get_property('current_chunk')
         if self.chunks.has_key(number):
@@ -90,6 +99,7 @@ class Corpus:
                 self.chunks[number] = file(os.path.join(self.corpus_path, Corpus.CHUNK_PREFIX + str(number)), 'r+b')
                 return self.chunks[number]
             except IOError, err:
+                # Dealing with "too many files opened"
                 if err.errno == 24:
                     self.chunks = {}
                     self.chunks[number] = file(os.path.join(self.corpus_path, Corpus.CHUNK_PREFIX + str(number)), 'r+b')
@@ -97,6 +107,7 @@ class Corpus:
                 else:
                     raise err
     def add(self, text, ident, **headers):
+        '''Appending new document to a corpus.'''
         if self.ridx.has_key(ident):
             raise Corpus.ExceptionDuplicate()
         
@@ -116,11 +127,13 @@ class Corpus:
         chunk.flush()
 
     def get(self, ident):
+        '''Get random document from a corpus.'''
         if not self.ridx.has_key(ident):
             raise IndexError('Not found')
         return self.get_by_idx(self.idx[self.ridx[ident]])
         
     def get_by_idx(self, idx):
+        '''Get document pointed by ``idx`` structure which is offset information in chunk file.'''
         (chunk_number, offset, head_len, text_len) = idx
         chunk = self.get_chunk(chunk_number)
         chunk.seek(offset,0)
@@ -130,6 +143,8 @@ class Corpus:
         
             
     class ExceptionTooBig(Exception):
+        '''Exception raised when document is to big to fit chunk file.'''
         pass
     class ExceptionDuplicate(Exception):
+        '''Exception raised when appending document with duplicate ``id``'''
         pass    

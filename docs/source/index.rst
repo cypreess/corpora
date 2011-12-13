@@ -1,5 +1,5 @@
-Welcome to Corpora!
-===================
+Welcome to Corpora's documentation!
+===================================
 Corpora is a lightweight raw text corpus system able to store a collection of raw text documents with additional key-value headers. Text headers element is basically a python dict object that can store any kind of yaml serializable data as a values and strings as keywords.
 
 Corpora provides four main features:
@@ -40,3 +40,23 @@ Basic usage:
     ... 
     ({'id': 1}, u'First document')
     ({'id': 2}, u'Second document')
+
+Contents
+========
+.. toctree::
+   :maxdepth: 2
+   
+   motivation
+   api
+   corpus
+   credits
+
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
