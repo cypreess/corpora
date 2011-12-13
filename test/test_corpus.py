@@ -98,7 +98,7 @@ class TestCorpus(unittest.TestCase):
         c.add(u'12345', 1)
         c.add(u'12345', 2)
         
-        (chunk_number, offset, head_len, text_len) = c.idx[c.ridx[2]]
+        (chunk_number, offset, head_len, text_len) = c.idx[int(c.ridx['2'])]
         self.assertEqual(chunk_number, 1)
         
         del c

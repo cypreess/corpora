@@ -3,6 +3,7 @@
 import os
 import yaml
 import cPickle as pickle
+from bsddb3 import btopen, hashopen, rnopen
 
 class Corpus:
     '''Corpus class is responsible for creating new corpus and also represents a corpus as an object'''
@@ -15,7 +16,8 @@ class Corpus:
         self.corpus_path = path
         self.chunks = {}
         self.idx = pickle.load(file(os.path.join(self.corpus_path, Corpus.IDX_FILE ), 'rb'))
-        self.ridx = pickle.load(file(os.path.join(self.corpus_path, Corpus.RIDX_FILE ), 'rb'))
+        # self.ridx = pickle.load(file(os.path.join(self.corpus_path, Corpus.RIDX_FILE ), 'rb'))
+        self.ridx = hashopen(os.path.join(self.corpus_path, Corpus.RIDX_FILE ))
         self.properties = yaml.load(file(os.path.join(self.corpus_path, Corpus.CONFIG_FILE), 'r'))
     
     def __len__(self):
@@ -49,7 +51,8 @@ class Corpus:
         file(os.path.join(path, Corpus.CHUNK_PREFIX + "0"), 'w').close()
         
         pickle.dump([], file(os.path.join(path, Corpus.IDX_FILE ), 'wb'))
-        pickle.dump({}, file(os.path.join(path, Corpus.RIDX_FILE ), 'wb'))
+        # pickle.dump({}, file(os.path.join(path, Corpus.RIDX_FILE ), 'wb'))
+        # hashopen(os.path.join(path, Corpus.RIDX_FILE )).sync()
       
     
     def save_config(self):
@@ -59,7 +62,8 @@ class Corpus:
     def save_indexes(self):
         '''Saving all indexes to apropriate files.'''
         pickle.dump(self.idx, file(os.path.join(self.corpus_path, Corpus.IDX_FILE ), 'wb'))
-        pickle.dump(self.ridx, file(os.path.join(self.corpus_path, Corpus.RIDX_FILE ), 'wb'))        
+        # pickle.dump(self.ridx, file(os.path.join(self.corpus_path, Corpus.RIDX_FILE ), 'wb'))        
+        self.ridx.sync()
     
     def make_new_chunk(self):
         '''Creates new chunk with next sequential chunk number.'''
@@ -108,7 +112,7 @@ class Corpus:
                     raise err
     def add(self, text, ident, **headers):
         '''Appending new document to a corpus.'''
-        if self.ridx.has_key(ident):
+        if self.ridx.has_key(str(ident)):
             raise Corpus.ExceptionDuplicate()
         
         headers['id'] = ident
@@ -121,16 +125,16 @@ class Corpus:
         chunk = self.get_chunk()
         chunk.seek(0,2)
         self.idx.append((self.get_property('current_chunk') , chunk.tell(), len(headers_str), len(text_str)))
-        self.ridx[ident] = len(self.idx)-1
+        self.ridx[str(ident)] = str( len(self.idx)-1 )
         chunk.write(headers_str)
         chunk.write(text_str)
         chunk.flush()
 
     def get(self, ident):
         '''Get random document from a corpus.'''
-        if not self.ridx.has_key(ident):
+        if not self.ridx.has_key(str(ident)):
             raise IndexError('Not found')
-        return self.get_by_idx(self.idx[self.ridx[ident]])
+        return self.get_by_idx(self.idx[int(self.ridx[str(ident)])])
         
     def get_by_idx(self, idx):
         '''Get document pointed by ``idx`` structure which is offset information in chunk file.'''
