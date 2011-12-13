@@ -26,11 +26,11 @@ Appending document to corpus
 .. automethod:: corpora.Corpus.add
 
 ``text``
-    document raw text formed as an Unicode; this will be encoded with ``encode`` property of corpus before saving to chunk.
+    a document raw text formed as an Unicode; this will be encoded with the ``encode`` property of corpus before saving to a chunk.
 ``ident``
-    a unique identifier of element, this can be a number or any string (ex. hash value); needed for random access.
+    a unique identifier of an element, this can be a number or any string (ex. hash value); needed for random access.
 ``**headers``
-    you can add any additional headers as key-value pairs; values can be any serializable by yaml objects; the key "id" is restricted for storing document ident.
+    you can add any additional headers as key-value pairs; values can be any serializable by yaml objects; the key "id" is restricted for storing the document ident.
     
 Example:
 ::
@@ -43,12 +43,23 @@ Example:
 .. note::
 
     documents are saved with order of appending them, this means that if you add 3 documents with ``id`` like 2, 1, 3 there will be served in the same order while accessed sequentially. 
-    
+
+
+
 .. warning::
 
     as you can see you can add any header to document. There is no pre-configuration what can be set as document header. This is very flexible, but in the same time can lead to problem with consistency of headers among all documents collections. Be sure that you append this same headers to every document in corpus or write your code in a way that will deal with ``KeyError`` from missing headers.
+
+After adding new documents to a corpus you need to sync indexes to a filesystem.
+
+.. automethod:: corpora.Corpus.save_indexes
+
+
+::
     
-    
+    c.save_indexes()
+
+
 Sequential access to corpus
 ---------------------------    
 Typical use of a corpus is to sequentially access all documents one-by-one. Corpora supports operation with generators.

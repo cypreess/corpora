@@ -12,7 +12,7 @@ An action of modifying documents in a corpora is not available as this system me
 
 A single corpus is represented as a directory in the filesystem, containing corpus chunk files, a config file, and index files. Corpora supports corpus file chunking, what make it possible to use it with no limit corpus size.
 
-Corpus chunks (storing raw text & headers) are human readable (but not editable due to index design).
+Corpus chunks (storing raw text and headers) are human readable (but not editable due to index design).
 
 Quickstart
 ----------
