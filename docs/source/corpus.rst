@@ -87,19 +87,20 @@ An example of two documents long chunk:
 
 File ``idx``
 ------------
-This file contains a list of documents descriptors (indexes in chunk file). This is serialized  list, that contains a tuples like:
+This file contains a list of documents descriptors (indexes in chunk file). This is a list, that contains a tuples like:
     * chunk number
     * offset of document start in chunk file
     * length of header section (with additional ``\n`` )
     * length of text section (with additional ``\n``)
 
-Currently the serialization is made with cPickle.
+This file is managed by DB Berkeley Recno structure.
+
 
 File ``ridx``
 -------------
-This files stores a random access index. Basically it is a dict containing a mapping of document ``id`` to the index in ``idx`` list. 
+This files stores a random access index. Basically it is a hashmap containing a mapping of document ``id`` to the index in ``idx`` list. 
 
-Currently this is cPickle serialized dict.
+This file is managed by DB Berkeley Hashmap structure.
 
 
 

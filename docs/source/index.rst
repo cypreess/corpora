@@ -49,6 +49,7 @@ Contents
    motivation
    api
    corpus
+   benchmarks
    credits
 
 

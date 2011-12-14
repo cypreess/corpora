@@ -29,6 +29,12 @@ Appending document to corpus
     a document raw text formed as an Unicode; this will be encoded with the ``encode`` property of corpus before saving to a chunk.
 ``ident``
     a unique identifier of an element, this can be a number or any string (ex. hash value); needed for random access.
+
+.. warning::
+    
+    you should assume that ``ident`` will be converted to string, so 1 and '1' are the same ``ident`` and are not unique.
+    
+    
 ``**headers``
     you can add any additional headers as key-value pairs; values can be any serializable by yaml objects; the key "id" is restricted for storing the document ident.
     

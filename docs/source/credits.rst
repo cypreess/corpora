@@ -13,7 +13,7 @@ Any comments are welcome.
 Source code and contribution
 -----------------------------
 
-Source code is under `merculiar (hg)`_ version control on bitbucket_:
+Source code is under `mercurial (hg)`_ version control on bitbucket_:
 
 http://bitbucket.org/cypreess/corpora/src 
 
