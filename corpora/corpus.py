@@ -2,40 +2,50 @@
 
 import os
 import yaml
-import cPickle as pickle
+from struct import pack, unpack
 from bsddb3 import btopen, hashopen, rnopen
 
 class Corpus:
     '''Corpus class is responsible for creating new corpus and also represents a corpus as an object'''
-    CHUNK_PREFIX="chunk"
-    CONFIG_FILE="config"
-    IDX_FILE="idx"
-    RIDX_FILE="ridx"
+    CHUNK_PREFIX='chunk'
+    CONFIG_FILE='config'
+    IDX_FILE='idx'
+    RIDX_FILE='ridx'
+    IDX_BYTEO='!QIII'
+    RIDX_BYTEO="!Q"
     
     def __init__(self, path):
         self.corpus_path = path
         self.chunks = {}
-        self.idx = pickle.load(file(os.path.join(self.corpus_path, Corpus.IDX_FILE ), 'rb'))
-        # self.ridx = pickle.load(file(os.path.join(self.corpus_path, Corpus.RIDX_FILE ), 'rb'))
-        self.ridx = hashopen(os.path.join(self.corpus_path, Corpus.RIDX_FILE ))
+        self.idx = rnopen(os.path.join(self.corpus_path, Corpus.IDX_FILE))
+        self.ridx = hashopen(os.path.join(self.corpus_path, Corpus.RIDX_FILE))
         self.properties = yaml.load(file(os.path.join(self.corpus_path, Corpus.CONFIG_FILE), 'r'))
     
     def __len__(self):
-        return len(self.idx)
+        return self.idx.db.stat()['nkeys']
     
     def __getitem__(self, key):
         return self.get(key)
     
     def __iter__(self):
         for e in self.idx:
-            yield self.get_by_idx(e)
+            yield self.get_by_idx(self.get_idx(e))
             
     
     def get_property(self, prop):
         return self.properties[prop]
+        
     def set_property(self, prop, val):
         self.properties[prop] = val
-
+    
+    def get_ridx(self, key):
+        '''Return index of idx for given ``key``'''
+        return unpack(Corpus.RIDX_BYTEO, self.ridx[str(key)])[0]
+        
+    def get_idx(self, index):
+        '''Return tuple (chunk, offset, header len, text len) for given ``index``'''
+        return unpack(Corpus.IDX_BYTEO, self.idx[index])
+        
     @staticmethod
     def create( path, **properties ):
         '''Static method for creating new corpus in the given ``path``. Additional
@@ -49,11 +59,6 @@ class Corpus:
         
         yaml.dump(properties, file(os.path.join(path, Corpus.CONFIG_FILE), 'w'), default_flow_style=False)
         file(os.path.join(path, Corpus.CHUNK_PREFIX + "0"), 'w').close()
-        
-        pickle.dump([], file(os.path.join(path, Corpus.IDX_FILE ), 'wb'))
-        # pickle.dump({}, file(os.path.join(path, Corpus.RIDX_FILE ), 'wb'))
-        # hashopen(os.path.join(path, Corpus.RIDX_FILE )).sync()
-      
     
     def save_config(self):
         '''Saving properties of corpora to config file.'''
@@ -61,8 +66,7 @@ class Corpus:
 
     def save_indexes(self):
         '''Saving all indexes to apropriate files.'''
-        pickle.dump(self.idx, file(os.path.join(self.corpus_path, Corpus.IDX_FILE ), 'wb'))
-        # pickle.dump(self.ridx, file(os.path.join(self.corpus_path, Corpus.RIDX_FILE ), 'wb'))        
+        self.idx.sync()
         self.ridx.sync()
     
     def make_new_chunk(self):
@@ -78,8 +82,6 @@ class Corpus:
                     file(os.path.join(self.corpus_path, Corpus.CHUNK_PREFIX + str(self.get_property('current_chunk'))), 'w').close()
                 else:
                     raise err
-
-        
         self.save_config()
     
     def test_chunk_size(self, new_size):
@@ -98,7 +100,6 @@ class Corpus:
         if self.chunks.has_key(number):
             return self.chunks[number]
         else:
-            
             try:
                 self.chunks[number] = file(os.path.join(self.corpus_path, Corpus.CHUNK_PREFIX + str(number)), 'r+b')
                 return self.chunks[number]
@@ -116,7 +117,7 @@ class Corpus:
             raise Corpus.ExceptionDuplicate()
         
         headers['id'] = ident
-        headers_str = yaml.dump(headers, default_flow_style=False) 
+        headers_str = yaml.dump(headers, default_flow_style=False)
         text_str = text.encode(self.get_property('encoding'))  + "\n\n"
 
         if not self.test_chunk_size(len(headers_str) + len(text_str)) :
@@ -124,8 +125,15 @@ class Corpus:
         
         chunk = self.get_chunk()
         chunk.seek(0,2)
-        self.idx.append((self.get_property('current_chunk') , chunk.tell(), len(headers_str), len(text_str)))
-        self.ridx[str(ident)] = str( len(self.idx)-1 )
+        index = self.idx.db.append(
+                    pack(               Corpus.IDX_BYTEO,
+                                        self.get_property('current_chunk') , 
+                                        chunk.tell(), 
+                                        len(headers_str), 
+                                        len(text_str)
+                                )
+                    )
+        self.ridx[str(ident)] = pack(Corpus.RIDX_BYTEO, index)
         chunk.write(headers_str)
         chunk.write(text_str)
         chunk.flush()
@@ -134,7 +142,7 @@ class Corpus:
         '''Get random document from a corpus.'''
         if not self.ridx.has_key(str(ident)):
             raise IndexError('Not found')
-        return self.get_by_idx(self.idx[int(self.ridx[str(ident)])])
+        return self.get_by_idx(self.get_idx(self.get_ridx(ident)))
         
     def get_by_idx(self, idx):
         '''Get document pointed by ``idx`` structure which is offset information in chunk file.'''
@@ -142,7 +150,7 @@ class Corpus:
         chunk = self.get_chunk(chunk_number)
         chunk.seek(offset,0)
         head = chunk.read(head_len)
-        text = chunk.read(text_len)[:-2]
+        text = chunk.read(text_len)[:-2]    #stripping two end-of-lines
         return (yaml.load(head) , text.decode(self.get_property('encoding')))
         
             

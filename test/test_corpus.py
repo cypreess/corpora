@@ -7,6 +7,12 @@ import shutil
 
 
 class TestCorpus(unittest.TestCase):
+    def setUp(self):
+        try:
+            shutil.rmtree('/tmp/TEST_CORPUS')
+        except:
+            pass
+
     def test_create(self):
         Corpus.create('/tmp/TEST_CORPUS', name=u"Fancy name")
         c = Corpus('/tmp/TEST_CORPUS')
@@ -98,7 +104,7 @@ class TestCorpus(unittest.TestCase):
         c.add(u'12345', 1)
         c.add(u'12345', 2)
         
-        (chunk_number, offset, head_len, text_len) = c.idx[int(c.ridx['2'])]
+        (chunk_number, offset, head_len, text_len) = c.get_idx(c.get_ridx(2))
         self.assertEqual(chunk_number, 1)
         
         del c
@@ -142,8 +148,5 @@ class TestCorpus(unittest.TestCase):
         
         
 if __name__ == '__main__':
-    try:
-        shutil.rmtree('/tmp/TEST_CORPUS')
-    except:
-        pass
+
     unittest.main()
