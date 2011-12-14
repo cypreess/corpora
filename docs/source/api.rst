@@ -1,6 +1,6 @@
 Corpora API
 ===========
-Corpora module is so far very simple and consists only of one class.
+Corpora module is very simple  so far and consists only of one class.
 
 .. autoclass:: corpora.Corpus
     :members:
@@ -114,6 +114,14 @@ Example:
 Exceptions
 ----------
 
-.. autoclass:: corpora.Corpus
-   
+.. py:exception:: corpora.Corpus.ExceptionTooBig
+
+
+    Exception raised when document is to big to fit chunk file.
+
+
+.. py:exception:: corpora.Corpus.ExceptionDuplicate
+
+    Exception raised when appending document with duplicate ``id``
+
 

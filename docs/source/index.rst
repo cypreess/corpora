@@ -1,18 +1,18 @@
 Welcome to Corpora's documentation!
 ===================================
-Corpora is a lightweight raw text corpus system able to store a collection of raw text documents with additional key-value headers. Text headers element is basically a python dict object that can store any kind of yaml serializable data as a values and strings as keywords.
+*Corpora* is a lightweight, fast and scalable corpus library able to store a collection of raw text documents with additional key-value headers. It uses Berkeley DB (bsddb3 module) for index managing what guarantee speed and bullet-proof. Text storage model is based on chunked flat, human readable text files. This architecture can easily scale up to millions documents, hundred of gigabytes collections.
 
-Corpora provides four main features:
+Corpora module provides four main features:
   * create a new corpus,
-  * append document to a corpus,
-  * random access to any document in a corpus by it's unique ``id``,
-  * sequential access (generator over collection).
+  * append documents to a corpus,
+  * random access to any document in a corpus using it's unique ``id``,
+  * sequential access to document collection (generator over collection).
 
-An action of modifying documents in a corpora is not available as this system ment to be KISS and supports only append & read-only.
+Key-Value document headers supports storing any kind of objects seriazable with yaml_. Corpora supports only append & read-only philosophy, for more information please read section :doc:`motivation`.
 
-A single corpus is represented as a directory in the filesystem, containing corpus chunk files, a config file, and index files. Corpora supports corpus file chunking, what make it possible to use it with no limit corpus size.
+.. _yaml: http://www.yaml.org/
 
-Corpus chunks (storing raw text & headers) are human readable (but not editable due to index design).
+
 
 Quickstart
 ----------
@@ -21,8 +21,10 @@ Installation:
     
     > sudo pip install corpora
 
+
 Basic usage:
 
+   
     >>> from corpora import Corpus
     >>> Corpus.create('/tmp/test_corpus')
     >>> c = Corpus('/tmp/test_corpus')

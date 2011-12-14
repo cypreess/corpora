@@ -3,7 +3,12 @@
 import os
 import yaml
 from struct import pack, unpack
-from bsddb3 import btopen, hashopen, rnopen
+
+try:
+    from bsddb3 import btopen, hashopen, rnopen
+except ImportError:
+    from bsddb import btopen, hashopen, rnopen
+    
 
 class Corpus:
     '''Corpus class is responsible for creating new corpus and also represents a corpus as an object'''
@@ -17,14 +22,16 @@ class Corpus:
     def __init__(self, path):
         self.corpus_path = path
         self.chunks = {}
-        self.idx = rnopen(os.path.join(self.corpus_path, Corpus.IDX_FILE))
+        self.idx = rnopen(os.path.join(self.corpus_path, Corpus.IDX_FILE))  #FIXME: issue #2 this should be implemented with bsddb3 Queue
         self.ridx = hashopen(os.path.join(self.corpus_path, Corpus.RIDX_FILE))
         self.properties = yaml.load(file(os.path.join(self.corpus_path, Corpus.CONFIG_FILE), 'r'))
     
     def __len__(self):
-        return self.idx.db.stat()['nkeys']
+        '''Returns size of document collection'''
+        return self.idx.db.stat()['nkeys']  #FIXME: issue #1 find more elegant bsddb3 to 
     
     def __getitem__(self, key):
+        '''Interface for get method'''
         return self.get(key)
     
     def __iter__(self):
