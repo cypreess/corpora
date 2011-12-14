@@ -12,15 +12,12 @@ Key-Value document headers supports storing any kind of objects seriazable with 
 
 .. _yaml: http://www.yaml.org/
 
-
-
 Quickstart
 ----------
 Installation:
 ::
     
     > sudo pip install corpora
-
 
 Basic usage:
 
