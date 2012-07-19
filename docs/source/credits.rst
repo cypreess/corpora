@@ -13,18 +13,10 @@ Any comments are welcome.
 Source code and contribution
 -----------------------------
 
-Source code is under `mercurial (hg)`_ version control on bitbucket_:
+Source code is under git version control on github:
 
-http://bitbucket.org/cypreess/corpora/src 
+https://github.com/cypreess/corpora
 
-License: LGPL_
-
-.. _bitbucket: http://bitbucket.org/
-.. _`merculiar (hg)`: http://mercurial.selenic.com/
-.. _LGPL: http://www.gnu.org/copyleft/lesser.html
+License: MIT
 
 
-Bugs & feature requests
------------------------
-
-Please use bitbucket issues tracker: https://bitbucket.org/cypreess/corpora/issues

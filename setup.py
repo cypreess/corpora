@@ -3,11 +3,11 @@ from setuptools import setup
 
 setup(
     name='Corpora',
-    version='1.0',
+    version='1.1',
     author="Krzysztof Dorosz",
     author_email="cypreess@gmail.com",
-    description=("Lightweight, fast and scalable text corpus library."),
-    license="LGPL",
+    description=("Lightweight NLP corpus format for python"),
+    license="MIT",
     keywords="text utf corpus corpora nlp toolkit",
     packages=['corpora', 'test'],
     long_description=open('README.txt').read(),
@@ -20,6 +20,6 @@ setup(
         "Topic :: Text Processing",
 
     ],
-    requires=['pyyaml', 'bsddb3'],
+    install_requires=['pyyaml', 'bsddb3'],
 
  )
