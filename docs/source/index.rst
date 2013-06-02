@@ -17,7 +17,7 @@ Quickstart
 Installation:
 ::
     
-    > sudo pip install corpora
+    $ sudo pip install corpora
 
 Basic usage:
 

@@ -8,19 +8,22 @@ Corpora module provides four main features:
   * random access to any document in a corpus using it's unique ``id``,
   * sequential access to document collection (generator over collection).
 
-Key-Value document headers supports storing any kind of objects seriazable with yaml_. Corpora supports only append & read-only philosophy, for more information please read section :doc:`motivation`.
+Key-Value document headers supports storing any kind of objects seriazable with yaml_. Corpora supports only append & read-only philosophy.
 
+For more information check documentation_
+
+.. _documentation: https://corpora.readthedocs.org/en/latest/
 .. _yaml: http://www.yaml.org/
 
 Quickstart
 ----------
 Installation:
 ::
-    
-    > sudo pip install corpora
+
+    $ sudo pip install corpora
 
 Basic usage:
-
+::
    
     >>> from corpora import Corpus
     >>> Corpus.create('/tmp/test_corpus')
